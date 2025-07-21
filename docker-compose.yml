@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: minegocio
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_NAME: minegocio
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: supersecreto
+    depends_on:
+      - db
+    command: npm run dev
+
+volumes:
+  pgdata:
