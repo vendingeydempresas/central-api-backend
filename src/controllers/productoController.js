@@ -3,7 +3,6 @@ const { Producto } = require('../models');
 
 exports.crearProducto = async (req, res) => {
   try {
-    // Mapear los campos que vienen del frontend a los esperados por Sequelize
     const nuevoProducto = await Producto.create({
       nombre: req.body.Nombre_Producto,
       descripcion: req.body.Descripcion || '',
@@ -12,9 +11,15 @@ exports.crearProducto = async (req, res) => {
       cantidad: req.body.Cantidad,
       lote: req.body.Lote,
       ubicacion: req.body.Ubicacion || '',
-      fecha_compra: req.body.Fecha_Compra || new Date(), // si no viene fecha, usar hoy
-      id_producto: req.body.Id_Producto || null,         // si manejas ID externo
+      fecha_compra: req.body.Fecha_Compra || new Date(),
+      id_producto: req.body.Id_Producto || null,
     });
+    res.status(201).json(nuevoProducto);
+  } catch (error) {
+    console.error('Error al crear producto:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
 
 exports.obtenerProductos = async (req, res) => {
   try {
@@ -22,14 +27,6 @@ exports.obtenerProductos = async (req, res) => {
     res.json(productos);
   } catch (error) {
     console.error('Error al obtener productos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-};
-
-
-    res.status(201).json(nuevoProducto);
-  } catch (error) {
-    console.error('Error al crear producto:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
