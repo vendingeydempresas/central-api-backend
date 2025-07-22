@@ -10,6 +10,8 @@ const productoRoutes = require('./routes/productos');
 // const ventaRoutes = require('./routes/ventas');
 const eventoRoutes = require('./routes/eventos');
 const webhookRoutes = require('./routes/webhook');
+const pagosRoutes = require('./routes/pagos');
+
 
 console.log('productoRoutes:', typeof productoRoutes);
 console.log('eventoRoutes:', typeof eventoRoutes);
@@ -25,6 +27,7 @@ app.use('/api/productos', productoRoutes);
 // app.use('/api/ventas', ventaRoutes);
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use("/api", pagosRoutes); // Quedará como /api/create-mp-link
 
 sequelize.sync({ alter: true }).then(() => console.log('DB sincronizada'));
 
