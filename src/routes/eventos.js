@@ -1,10 +1,10 @@
 // routes/eventos.js
 const express = require('express');
 const router = express.Router();
+const eventoController = require('../controllers/eventoController');
 
-// Aquí tus controladores y rutas, por ejemplo:
-router.get('/', (req, res) => {
-  res.send('Lista de eventos');
-});
+router.get('/', eventoController.obtenerEventos);
+router.post('/', eventoController.crearEvento);
 
 module.exports = router;
+
