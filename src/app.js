@@ -10,7 +10,7 @@ const productoRoutes = require('./routes/productos');
 // const ventaRoutes = require('./routes/ventas');
 const eventoRoutes = require('./routes/eventos');
 const webhookRoutes = require('./routes/webhook');
-const pagosRoutes = require('./routes/pagos');
+const pagosRoutes = require('./routes/pagos').default;
 
 
 console.log('productoRoutes:', typeof productoRoutes);
