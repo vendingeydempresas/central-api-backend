@@ -6,7 +6,7 @@ exports.crearEvento = async (req, res) => {
   try {
     const nuevoEvento = await Evento.create({
       tipo_evento: 'evento_pago',
-      ID_Poducto_IV: req.body.ID_Poducto_IV,
+      ID_Producto_IV: req.body.ID_Producto_IV,
       Nombre_Producto_IV: req.body.Nombre_Producto_IV,
       Cantidad_Link_Pago_IV: req.body.Cantidad_Link_Pago_IV,
       Precio_Venta_IV: req.body.Precio_Venta_IV,
