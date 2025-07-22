@@ -16,6 +16,17 @@ exports.crearProducto = async (req, res) => {
       id_producto: req.body.Id_Producto || null,         // si manejas ID externo
     });
 
+exports.obtenerProductos = async (req, res) => {
+  try {
+    const productos = await Producto.findAll();
+    res.json(productos);
+  } catch (error) {
+    console.error('Error al obtener productos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+
     res.status(201).json(nuevoProducto);
   } catch (error) {
     console.error('Error al crear producto:', error);
