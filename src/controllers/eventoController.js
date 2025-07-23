@@ -1,9 +1,11 @@
 // controllers/eventoController.js
-// controllers/eventoController.js
-const { Evento } = require('../models');
+const db = require('../models');
+const Evento = db.Evento;
 
 exports.crearEvento = async (req, res) => {
   try {
+    console.log("REQ.BODY RECIBIDO:", req.body); // Debug
+
     const nuevoEvento = await Evento.create({
       tipo_evento: 'evento_pago',
       ID_Producto_IV: req.body.ID_Producto_IV,
@@ -24,18 +26,17 @@ exports.crearEvento = async (req, res) => {
 
     res.status(201).json(nuevoEvento);
   } catch (error) {
-    console.error('Error al crear evento:', error);
+    console.error('❌ Error al crear evento:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
-// 🚨 ESTA PARTE FALTABA
 exports.obtenerEventos = async (req, res) => {
   try {
     const eventos = await Evento.findAll();
     res.json(eventos);
   } catch (error) {
-    console.error('Error al obtener eventos:', error);
+    console.error('❌ Error al obtener eventos:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
