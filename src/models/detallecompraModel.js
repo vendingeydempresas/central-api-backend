@@ -1,59 +1,62 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const detallecompra = sequelize.define('detallecompra', {
+const DetalleCompra = sequelize.define('DetalleCompra', {
   ID_Producto_IV: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   Nombre_Producto_IV: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   Cantidad_Link_Pago_IV: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
   },
   Precio_Venta_IV: {
     type: DataTypes.FLOAT,
-    allowNull: false
+    allowNull: false,
   },
   Descripcion_IV: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
   },
   Cantidad_Cargada_IV: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
   },
   Numero_Vending_IV: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   Numero_Motor_IV: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   Link_Pago: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
   },
   QR_Link_Pago: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
   },
   timestamp: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: false,
   },
   Lote_Cargado_IV: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
   },
   Precio_Compra_IV: {
     type: DataTypes.FLOAT,
-    allowNull: false
-  }
+    allowNull: false,
+  },
+}, {
+  tableName: 'detallecompras', // Asegúrate de que la tabla en la base de datos se llama 'detallecompras'
+  timestamps: true, // Esto manejará los campos createdAt y updatedAt automáticamente
 });
 
-module.exports = detallecompra;
+module.exports = DetalleCompra;
