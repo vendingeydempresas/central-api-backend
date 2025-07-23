@@ -1,3 +1,5 @@
+const detallecompra = require('../models/detallecompraModel');
+
 exports.guardardetallecompra = async (req, res) => {
   try {
     const {
@@ -21,10 +23,10 @@ exports.guardardetallecompra = async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
     }
 
-    console.log('Datos recibidos:', req.body);
+    console.log('Datos recibidos:', req.body);  // Verifica si los datos llegan correctamente
 
     // Crear el producto
-    const producto = new detallecompra({
+    const producto = await detallecompra.create({
       ID_Producto_IV,
       Nombre_Producto_IV,
       Cantidad_Link_Pago_IV,
@@ -40,14 +42,10 @@ exports.guardardetallecompra = async (req, res) => {
       Precio_Compra_IV,
     });
 
-    // Guardar en la base de datos
-    await producto.save();
-    console.log('Producto guardado:', producto);
-
     res.status(201).json({ message: 'Producto guardado exitosamente', producto });
 
   } catch (error) {
     console.error('Error al guardar el producto:', error);
-    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
