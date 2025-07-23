@@ -23,7 +23,7 @@ app.use('/api/productos', productoRoutes);
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use("/api", pagosRoutes); // Quedará como /api/create-mp-link
-app.use('/api/producto-nuevo', detallecompraRoutes); // Nueva ruta para productos
+app.use('/api/detallecompra', detallecompraRoutes); // Nueva ruta para productos
 
 // Sincronizar la base de datos
 sequelize.sync({ alter: true }).then(() => console.log('DB sincronizada'));
