@@ -1,12 +1,33 @@
-const Notificacion = require('./notificacionModel');
-const sequelize = require('../config/database');
-const Cliente = require('./clienteModel');
-const Producto = require('./productoModel');
-const Venta = require('./ventaModel');
-const Evento = require('./eventoModel');
-const Usuario = require('./usuarioModel');
+// models/index.js
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const basename = path.basename(__filename);
+const config = require(__dirname + '/../config/database.js');
+const db = {};
 
-Cliente.hasMany(Venta);
-Venta.belongsTo(Cliente);
+const sequelize = new Sequelize(config);
 
-module.exports = { sequelize, Cliente, Producto, Venta, Evento, Usuario, Notificacion };
+fs
+  .readdirSync(__dirname)
+  .filter(
+    file =>
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js'
+  )
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
+
+// Relaciones de ejemplo
+if (db.Cliente && db.Venta) {
+  db.Cliente.hasMany(db.Venta);
+  db.Venta.belongsTo(db.Cliente);
+}
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
