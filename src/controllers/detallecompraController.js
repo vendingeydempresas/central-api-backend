@@ -1,4 +1,4 @@
-const detallecompra = require('../models/detallecompraModel');
+const DetalleCompra = require('../models/detallecompraModel');
 
 exports.guardardetallecompra = async (req, res) => {
   try {
@@ -19,14 +19,12 @@ exports.guardardetallecompra = async (req, res) => {
     } = req.body;
 
     // Validación básica
-    if (!ID_Producto_IV || !Nombre_Producto_IV) {
+    if (!ID_Producto_IV || !Nombre_Producto_IV || !Cantidad_Link_Pago_IV) {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
     }
 
-    console.log('Datos recibidos:', req.body);  // Verifica si los datos llegan correctamente
-
-    // Crear el producto
-    const producto = await detallecompra.create({
+    // Intentamos crear el producto en la base de datos
+    const producto = await DetalleCompra.create({
       ID_Producto_IV,
       Nombre_Producto_IV,
       Cantidad_Link_Pago_IV,
@@ -43,9 +41,8 @@ exports.guardardetallecompra = async (req, res) => {
     });
 
     res.status(201).json({ message: 'Producto guardado exitosamente', producto });
-
   } catch (error) {
     console.error('Error al guardar el producto:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: 'Error al guardar el producto', details: error.message });
   }
 };
