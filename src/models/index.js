@@ -1,12 +1,9 @@
-// models/index.js
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
-const config = require(__dirname + '/../config/database.js');
+const sequelize = require(__dirname + '/../config/database.js');
 const db = {};
-
-const sequelize = new Sequelize(config);
 
 fs
   .readdirSync(__dirname)
