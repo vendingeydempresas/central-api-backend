@@ -8,7 +8,7 @@ const { sequelize } = require('./models');
 const productoRoutes = require('./routes/productos');
 const eventoRoutes = require('./routes/eventos');
 const webhookRoutes = require('./routes/webhook');
-const pagoRoutes = require('./routes/pago'); // Correcta importación de las rutas de pago
+const pagoRoutes = require('./routes/pagos'); // Correcta importación de las rutas de pago
 const detallecompraRoutes = require('./routes/detallecompra'); // Nueva ruta para detallecompra
 
 // Log de comprobación
