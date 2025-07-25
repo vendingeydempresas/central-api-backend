@@ -12,6 +12,9 @@ const retornoTransaccion = async (req, res) => {
   const body = req.body || {};
   const query = req.query || {};
 
+  console.log('query:', query);  // Agrega este log para ver la query completa
+  console.log('data en query:', query.data);  // Verifica el valor de data
+
   const token_ws = body.token_ws || query.token_ws; // Token enviado por Transbank
   const tbk_token = body.TBK_TOKEN || query.TBK_TOKEN; // Si el pago fue cancelado
 
@@ -21,17 +24,21 @@ const retornoTransaccion = async (req, res) => {
 
   if (dataParam) {
     try {
-      parsedData = JSON.parse(dataParam);
+      parsedData = JSON.parse(dataParam);  // Intenta parsear el JSON
+      console.log('Parsed Data:', parsedData);  // Verifica cómo se parsea el JSON
     } catch (e) {
       console.error('Error al decodificar el parámetro data:', e);
       return res.status(400).send('Error al procesar los datos de la URL');
     }
   }
 
-  // Mostrar los detalles del parámetro data
-  if (parsedData) {
-    console.log('Datos recibidos:', parsedData);
+  // Si no hay data válida, retornamos error
+  if (!parsedData) {
+    return res.status(400).send("⚠️ No se recibió información válida de Transbank.");
   }
+
+  // Mostrar los detalles del parámetro data (para ver qué estamos recibiendo)
+  console.log('Datos recibidos:', parsedData);
 
   if (token_ws) {
     try {
