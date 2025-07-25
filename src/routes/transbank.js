@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { createPayment, handleReturn } = require('../controllers/transbankController');
+const transbankController = require('../controllers/transbankController');  // Importar correctamente el controlador
 
-// Ruta para crear la transacción de pago
-router.post('/pago', createPayment);
-
-// Ruta para manejar el retorno de la transacción
-router.all('/retorno', handleReturn);
+// Ruta para manejar el retorno de Transbank
+router.all('/retorno', transbankController.retornoTransaccion);  // Asegúrate de que esta función exista en el controlador
 
 module.exports = router;
+
