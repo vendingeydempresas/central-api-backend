@@ -10,35 +10,21 @@ const BASE_URL = "https://central-api-backend.onrender.com"; // Cambia a tu URL 
 // Función para manejar el retorno después del pago
 const retornoTransaccion = async (req, res) => {
   const body = req.body || {};
-  const query = req.query || {};
+  
+  console.log('Cuerpo recibido:', body);  // Agrega este log para ver el cuerpo completo de la solicitud
 
-  console.log('query:', query);  // Agrega este log para ver la query completa
-  console.log('data en query:', query.data);  // Verifica el valor de data
-
-  const token_ws = body.token_ws || query.token_ws; // Token enviado por Transbank
-  const tbk_token = body.TBK_TOKEN || query.TBK_TOKEN; // Si el pago fue cancelado
-
-  // Decodificar el parámetro `data` desde la URL
-  const dataParam = query.data ? decodeURIComponent(query.data) : null;
-  let parsedData = null;
-
-  if (dataParam) {
-    try {
-      parsedData = JSON.parse(dataParam);  // Intenta parsear el JSON
-      console.log('Parsed Data:', parsedData);  // Verifica cómo se parsea el JSON
-    } catch (e) {
-      console.error('Error al decodificar el parámetro data:', e);
-      return res.status(400).send('Error al procesar los datos de la URL');
-    }
-  }
-
-  // Si no hay data válida, retornamos error
+  // Si recibimos el parámetro 'data' dentro del cuerpo
+  const parsedData = body.data;
+  
   if (!parsedData) {
     return res.status(400).send("⚠️ No se recibió información válida de Transbank.");
   }
 
   // Mostrar los detalles del parámetro data (para ver qué estamos recibiendo)
   console.log('Datos recibidos:', parsedData);
+
+  const token_ws = body.token_ws; // Token enviado por Transbank
+  const tbk_token = body.TBK_TOKEN; // Si el pago fue cancelado
 
   if (token_ws) {
     try {
@@ -62,8 +48,8 @@ const retornoTransaccion = async (req, res) => {
       res.status(500).send('Error al confirmar la transacción.');
     }
   } else if (tbk_token) {
-    const orden = body.TBK_ORDEN_COMPRA || query.TBK_ORDEN_COMPRA;
-    const sesion = body.TBK_ID_SESION || query.TBK_ID_SESION;
+    const orden = body.TBK_ORDEN_COMPRA;
+    const sesion = body.TBK_ID_SESION;
 
     res.send(`
       <html>
