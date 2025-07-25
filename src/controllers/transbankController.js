@@ -2,26 +2,24 @@ const { WebpayPlus, Options, Environment } = require('transbank-sdk');
 const options = new Options(
   '597055555532', // Código de comercio
   '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C', // API Key
-  Environment.Integration
+  Environment.Integration // Especificamos el ambiente de integración
 );
 
 const BASE_URL = "https://central-api-backend.onrender.com"; // Cambia a tu URL de producción
 
-// Ruta para manejar el retorno después del pago
-app.all('/transbank/retorno', async (req, res) => {
+// Función para manejar el retorno después del pago
+const retornoTransaccion = async (req, res) => {
   const body = req.body || {};
   const query = req.query || {};
 
-  // Obtener el token de la transacción
-  const token_ws = body.token_ws || query.token_ws;  // Token enviado por Transbank
+  const token_ws = body.token_ws || query.token_ws; // Token enviado por Transbank
   const tbk_token = body.TBK_TOKEN || query.TBK_TOKEN; // Si el pago fue cancelado
 
   if (token_ws) {
     try {
       const transaction = new WebpayPlus.Transaction(options);
-      const result = await transaction.commit(token_ws);  // Confirmamos la transacción con Webpay
+      const result = await transaction.commit(token_ws); // Confirmamos la transacción con Webpay
 
-      // Mostrar los detalles de la transacción (AUTORIZED o FAILED)
       res.send(`
         <html>
           <body>
@@ -39,7 +37,6 @@ app.all('/transbank/retorno', async (req, res) => {
       res.status(500).send('Error al confirmar la transacción.');
     }
   } else if (tbk_token) {
-    // Si el usuario cancela la transacción
     const orden = body.TBK_ORDEN_COMPRA || query.TBK_ORDEN_COMPRA;
     const sesion = body.TBK_ID_SESION || query.TBK_ID_SESION;
 
@@ -54,7 +51,8 @@ app.all('/transbank/retorno', async (req, res) => {
       </html>
     `);
   } else {
-    // Si no se recibe el token_ws o el TBK_TOKEN
     res.status(400).send("⚠️ No se recibió información válida de Transbank.");
   }
-});
+};
+
+module.exports = { retornoTransaccion };
