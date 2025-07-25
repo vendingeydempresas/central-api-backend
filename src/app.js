@@ -1,21 +1,21 @@
-require('dotenv').config({ path: '../.env' }); // Carga el .env desde un nivel arriba
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { sequelize } = require('./models');
+import dotenv from 'dotenv'; // Cargar el .env
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { sequelize } from './models';
 
 // Rutas
-const productoRoutes = require('./routes/productos');
-const eventoRoutes = require('./routes/eventos');
-const webhookRoutes = require('./routes/webhook');
-const pagoRoutes = require('./routes/pagos'); // Correcta importación de las rutas de pago
-const detallecompraRoutes = require('./routes/detallecompra'); // Nueva ruta para detallecompra
+import productoRoutes from './routes/productos';
+import eventoRoutes from './routes/eventos';
+import webhookRoutes from './routes/webhook';
+import pagoRoutes from './routes/pagos';
+import detallecompraRoutes from './routes/detallecompra';
 
-// Log de comprobación
-console.log('productoRoutes:', typeof productoRoutes);
-console.log('eventoRoutes:', typeof eventoRoutes);
+// Cargar el archivo .env
+dotenv.config({ path: '../.env' }); 
 
 const app = express();
+
 app.use(cors());
 app.use(bodyParser.json()); // Middleware para parsear JSON
 
