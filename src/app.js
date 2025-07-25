@@ -10,6 +10,7 @@ const eventoRoutes = require('./routes/eventos');
 const webhookRoutes = require('./routes/webhook');
 const pagosRoutes = require('./routes/pagos').default;
 const detallecompraRoutes = require('./routes/detallecompra'); // Nueva ruta para detallecompra
+const transbankRoutes = require('./routes/transbank');  // Nueva ruta para transacciones
 
 // Log de comprobación
 console.log('productoRoutes:', typeof productoRoutes);
@@ -25,6 +26,7 @@ app.use('/api/eventos', eventoRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use("/api", pagosRoutes); // Quedará como /api/create-mp-link
 app.use('/api/detallecompra', detallecompraRoutes); // Ruta para manejar detalle de compra
+app.use('/transbank', transbankRoutes);
 
 // Sincronizar la base de datos
 sequelize.sync({ alter: true }).then(() => console.log('DB sincronizada'));
