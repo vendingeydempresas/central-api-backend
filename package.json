@@ -2,7 +2,7 @@
   "name": "central-api-backend",
   "version": "1.0.0",
   "main": "src/app.js",
-  "type": "module",  // Esto permite usar import/export
+  "type": "module",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
