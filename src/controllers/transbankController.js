@@ -26,7 +26,7 @@ const createPayment = async (req, res) => {
   const buyOrder = `order_${Date.now()}`;
   const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
   const amount = price;
-  const returnUrl = `${BASE_URL}/retorno`; // URL para el retorno después del pago
+  const returnUrl = `${BASE_URL}/transbank/retorno`; // URL para el retorno después del pago
 
   try {
     const { url, token } = await createTransaction({
@@ -36,20 +36,13 @@ const createPayment = async (req, res) => {
       returnUrl
     });
 
-    res.send(`
-      <html>
-        <body onload="document.forms[0].submit()">
-          <form action="${url}" method="POST">
-            <input type="hidden" name="token_ws" value="${token}" />
-          </form>
-        </body>
-      </html>
-    `);
+    res.send({ url, token });  // Enviar solo la URL y token al frontend
   } catch (error) {
     console.error('Error creando la transacción:', error);
     res.status(500).send('Error en el servidor');
   }
 };
+
 
 // Controlador para manejar el retorno después del pago
 const handleReturn = async (req, res) => {
