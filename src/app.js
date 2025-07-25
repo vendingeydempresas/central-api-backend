@@ -2,7 +2,7 @@ import dotenv from 'dotenv'; // Cargar el .env
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { sequelize } from './models';
+import { sequelize } from './models/index.js';
 
 // Rutas
 import productoRoutes from './routes/productos';
