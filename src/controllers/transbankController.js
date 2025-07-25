@@ -15,6 +15,24 @@ const retornoTransaccion = async (req, res) => {
   const token_ws = body.token_ws || query.token_ws; // Token enviado por Transbank
   const tbk_token = body.TBK_TOKEN || query.TBK_TOKEN; // Si el pago fue cancelado
 
+  // Decodificar el parámetro `data` desde la URL
+  const dataParam = query.data ? decodeURIComponent(query.data) : null;
+  let parsedData = null;
+
+  if (dataParam) {
+    try {
+      parsedData = JSON.parse(dataParam);
+    } catch (e) {
+      console.error('Error al decodificar el parámetro data:', e);
+      return res.status(400).send('Error al procesar los datos de la URL');
+    }
+  }
+
+  // Mostrar los detalles del parámetro data
+  if (parsedData) {
+    console.log('Datos recibidos:', parsedData);
+  }
+
   if (token_ws) {
     try {
       const transaction = new WebpayPlus.Transaction(options);
