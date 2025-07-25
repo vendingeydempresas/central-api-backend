@@ -1,60 +1,41 @@
 // controllers/pagoController.js
-const { crearLinkMercadoPago } = require('../config/mercadopago');
-const { createTransaction } = require('../config/transbank');
+const ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN; // Reemplaza con tu token real
 
-// Función para crear link de pago de Mercado Pago
-const crearLinkMercadoPagoController = async (req, res) => {
+export const crearLinkMercadoPago = async (req, res) => {
   const { title, quantity, price, description, external_reference } = req.body;
+  console.log("Datos recibidos:", req.body);
+
   try {
-    const link = await crearLinkMercadoPago({ title, quantity, price, description, external_reference });
-    res.status(200).json(link);
+    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify({
+        items: [{
+          title,
+          quantity: Number(quantity),
+          currency_id: "CLP",
+          unit_price: Number(price),
+          description,
+          external_reference,
+        }],
+        external_reference,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error("Error en Mercado Pago API:", errorBody);
+      return res.status(response.status).json({ error: errorBody });
+    }
+
+    const data = await response.json();
+    res.status(200).json({ init_point: data.init_point });
   } catch (error) {
-    console.error('Error al crear el link de Mercado Pago:', error);
+    console.error("Error interno en API:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Función para crear transacción de Transbank
-const crearTransaccionTransbankController = async (req, res) => {
-  const data = req.query.data;
-  if (!data) {
-    return res.status(400).send('Datos de pago no recibidos');
-  }
-
-  let producto;
-  try {
-    producto = JSON.parse(decodeURIComponent(data));
-  } catch (err) {
-    return res.status(400).send('Error al procesar los datos del pago');
-  }
-
-  const { title, price } = producto;
-  const buyOrder = `order_${Date.now()}`;
-  const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
-  const amount = price;
-  const returnUrl = `${process.env.BASE_URL}/retorno`;  // Usar base URL del entorno
-
-  try {
-    const { url, token } = await createTransaction({
-      buyOrder,
-      sessionId,
-      amount,
-      returnUrl,
-    });
-
-    res.send(`
-      <html>
-        <body onload="document.forms[0].submit()">
-          <form action="${url}" method="POST">
-            <input type="hidden" name="token_ws" value="${token}" />
-          </form>
-        </body>
-      </html>
-    `);
-  } catch (error) {
-    console.error('Error creando transacción en Transbank:', error);
-    res.status(500).send('Error al crear la transacción');
-  }
-};
-
-module.exports = { crearLinkMercadoPagoController, crearTransaccionTransbankController };
