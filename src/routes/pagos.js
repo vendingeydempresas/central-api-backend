@@ -1,12 +1,9 @@
+// routes/pagos.js
 import express from "express";
-import { crearLinkMercadoPagoController, crearTransaccionTransbankController } from "../controllers/pagoController.js"; // Importar las funciones correctas
+import { crearLinkMercadoPago } from "../controllers/pagoController.js";
 
 const router = express.Router();
 
-// Ruta para crear el link de pago de Mercado Pago
-router.post("/create-mp-link", crearLinkMercadoPagoController);
+router.post("/create-mp-link", crearLinkMercadoPago);
 
-// Ruta para crear el link de pago de Webpay (Transbank)
-router.post("/create-tbk-link", crearTransaccionTransbankController);
-
-export default router; // Exportar el router correctamente
+export default router;
