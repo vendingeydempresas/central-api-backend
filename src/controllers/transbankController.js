@@ -1,58 +1,27 @@
-const { createTransaction } = require('../services/transbank');  // Asumiendo que lo colocamos en services
 const { WebpayPlus, Options, Environment } = require('transbank-sdk');
 const options = new Options(
-  '597055555532',  // Código de comercio
+  '597055555532', // Código de comercio
   '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C', // API Key
   Environment.Integration
 );
 
-const BASE_URL = "https://central-api-backend.onrender.com"; // Cambiar al URL de tu API
+const BASE_URL = "https://central-api-backend.onrender.com"; // Cambia a tu URL de producción
 
-// Controlador para crear transacciones
-const createPayment = async (req, res) => {
-  const data = req.body.data;  // Aquí debes pasar los datos desde el cliente
-  if (!data) {
-    return res.status(400).send('Datos de pago no recibidos');
-  }
+// Ruta para manejar el retorno después del pago
+app.all('/transbank/retorno', async (req, res) => {
+  const body = req.body || {};
+  const query = req.query || {};
 
-  let producto;
-  try {
-    producto = JSON.parse(data); // Decodificar los datos JSON recibidos
-  } catch (err) {
-    return res.status(400).send('Error al procesar los datos del pago');
-  }
+  // Obtener el token de la transacción
+  const token_ws = body.token_ws || query.token_ws;  // Token enviado por Transbank
+  const tbk_token = body.TBK_TOKEN || query.TBK_TOKEN; // Si el pago fue cancelado
 
-  const { title, price } = producto;
-  const buyOrder = `order_${Date.now()}`;
-  const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
-  const amount = price;
-  const returnUrl = `${BASE_URL}/transbank/retorno`; // URL para el retorno después del pago
-
-  try {
-    const { url, token } = await createTransaction({
-      buyOrder,
-      sessionId,
-      amount,
-      returnUrl
-    });
-
-    res.send({ url, token });  // Enviar solo la URL y token al frontend
-  } catch (error) {
-    console.error('Error creando la transacción:', error);
-    res.status(500).send('Error en el servidor');
-  }
-};
-
-
-// Controlador para manejar el retorno después del pago
-const handleReturn = async (req, res) => {
-  const { token_ws, TBK_TOKEN } = req.body || req.query;
-  
   if (token_ws) {
     try {
       const transaction = new WebpayPlus.Transaction(options);
-      const result = await transaction.commit(token_ws); // Confirmar la transacción
+      const result = await transaction.commit(token_ws);  // Confirmamos la transacción con Webpay
 
+      // Mostrar los detalles de la transacción (AUTORIZED o FAILED)
       res.send(`
         <html>
           <body>
@@ -66,12 +35,13 @@ const handleReturn = async (req, res) => {
         </html>
       `);
     } catch (error) {
-      console.error('Error confirmando la transacción:', error);
-      res.status(500).send('Error al confirmar la transacción');
+      console.error('Error en commit:', error);
+      res.status(500).send('Error al confirmar la transacción.');
     }
-  } else if (TBK_TOKEN) {
-    const orden = req.body.TBK_ORDEN_COMPRA || req.query.TBK_ORDEN_COMPRA;
-    const sesion = req.body.TBK_ID_SESION || req.query.TBK_ID_SESION;
+  } else if (tbk_token) {
+    // Si el usuario cancela la transacción
+    const orden = body.TBK_ORDEN_COMPRA || query.TBK_ORDEN_COMPRA;
+    const sesion = body.TBK_ID_SESION || query.TBK_ID_SESION;
 
     res.send(`
       <html>
@@ -79,16 +49,12 @@ const handleReturn = async (req, res) => {
           <h1>❌ Transacción cancelada por el usuario</h1>
           <p>Orden: ${orden}</p>
           <p>Sesión: ${sesion}</p>
-          <p>Token: ${TBK_TOKEN}</p>
+          <p>Token: ${tbk_token}</p>
         </body>
       </html>
     `);
   } else {
+    // Si no se recibe el token_ws o el TBK_TOKEN
     res.status(400).send("⚠️ No se recibió información válida de Transbank.");
   }
-};
-
-module.exports = {
-  createPayment,
-  handleReturn
-};
+});
