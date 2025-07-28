@@ -4,5 +4,5 @@ const detallecompraController = require('../controllers/detallecompraController'
 
 // Ruta POST para guardar un detalle de compra
 router.post('/', detallecompraController.guardardetallecompra);
-
+router.get('/', obtenerDetalles);
 module.exports = router;
