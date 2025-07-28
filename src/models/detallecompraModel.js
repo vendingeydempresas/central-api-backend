@@ -35,11 +35,11 @@ const DetalleCompra = sequelize.define('DetalleCompra', {
     allowNull: false,
   },
   Link_Pago: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   QR_Link_Pago: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   timestamp: {
