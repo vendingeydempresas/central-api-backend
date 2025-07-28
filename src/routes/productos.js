@@ -1,10 +1,10 @@
-// routes/productos.js
 const express = require('express');
 const router = express.Router();
 const { 
   crearProducto, 
   obtenerProductos, 
-  actualizarProductoPorLote // <--- Asegúrate de importar esta función
+  actualizarProductoPorLote,
+  obtenerProductoPorLote // ✅ nueva función agregada
 } = require('../controllers/productoController');
 
 // Crear producto
@@ -13,7 +13,11 @@ router.post('/', crearProducto);
 // Obtener todos los productos
 router.get('/', obtenerProductos);
 
-// ✅ Nueva ruta para actualizar por LOTE
+// ✅ Obtener producto por lote (query string: ?lote=...)
+router.get('/lote', obtenerProductoPorLote);
+
+// ✅ Actualizar producto por lote (param: /lote/:lote)
 router.patch('/lote/:lote', actualizarProductoPorLote);
 
 module.exports = router;
+
