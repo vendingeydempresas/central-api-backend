@@ -1,4 +1,3 @@
-// controllers/productoController.js
 const { Producto } = require('../models');
 
 // Crear producto
@@ -52,5 +51,27 @@ exports.actualizarProductoPorLote = async (req, res) => {
   } catch (error) {
     console.error('Error actualizando producto por lote:', error);
     res.status(500).json({ error: 'Error actualizando producto' });
+  }
+};
+
+// ✅ Nuevo: Obtener producto por lote usando query string
+exports.obtenerProductoPorLote = async (req, res) => {
+  const { lote } = req.query;
+
+  if (!lote) {
+    return res.status(400).json({ error: "Parámetro 'lote' es requerido" });
+  }
+
+  try {
+    const producto = await Producto.findOne({ where: { lote } });
+
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado por lote' });
+    }
+
+    res.status(200).json({ data: producto });
+  } catch (error) {
+    console.error('Error al buscar producto por lote:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
