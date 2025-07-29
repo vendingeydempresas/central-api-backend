@@ -1,22 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const { crearProductoCatalogo, obtenerCatalogo } = require('../controllers/catalogoController');
+const { upload } = require('../config/cloudinary');
 
-// Importa el middleware de multer
-const upload = require('../middleware/multer');
+// Este maneja imagen principal (1), imágenes adicionales (hasta 4) y video (1)
+const fields = [
+  { name: "imagenPrincipal", maxCount: 1 },
+  { name: "imagenesAdicionales", maxCount: 4 },
+  { name: "video", maxCount: 1 },
+];
 
-// Ruta para crear producto con imágenes y video
-router.post(
-  '/',
-  upload.fields([
-    { name: 'imagenPrincipal', maxCount: 1 },
-    { name: 'imagenesAdicionales', maxCount: 4 },
-    { name: 'video', maxCount: 1 }
-  ]),
-  crearProductoCatalogo
-);
-
-// Ruta para obtener el catálogo
+// Usar upload.fields para permitir múltiples tipos
+router.post('/', upload.fields(fields), crearProductoCatalogo);
 router.get('/', obtenerCatalogo);
 
 module.exports = router;
