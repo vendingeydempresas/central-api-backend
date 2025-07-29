@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { crearProductoCatalogo, obtenerCatalogo } = require('../controllers/catalogoController');
 const { upload } = require('../config/cloudinary');
+const Catalogo = require('../models/catalogoModel');
+
 
 // Usamos multer con los campos definidos para archivos multimedia
 router.post(
