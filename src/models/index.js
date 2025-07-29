@@ -5,8 +5,9 @@ const Producto = require('./productoModel');
 const Venta = require('./ventaModel');
 const Evento = require('./eventoModel');
 const Usuario = require('./usuarioModel');
+const Catalogo = require('./catalogoModel');
 
 Cliente.hasMany(Venta);
 Venta.belongsTo(Cliente);
 
-module.exports = { sequelize, Cliente, Producto, Venta, Evento, Usuario, Notificacion };
+module.exports = { sequelize, Cliente, Producto, Venta, Evento, Usuario, Notificacion, Catalogo, };
