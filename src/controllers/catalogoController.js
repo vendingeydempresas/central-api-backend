@@ -8,11 +8,13 @@ exports.crearProductoCatalogo = async (req, res) => {
       descripcion,
       precio,
       categoria,
-      subcategoria,
-      imagen_principal_url,
-      imagenes_adicionales_url,
-      video_url,
+      subcategoria
     } = req.body;
+
+    // Procesar archivos de Cloudinary desde req.files
+    const imagenPrincipal = req.files?.imagenPrincipal?.[0]?.path || null;
+    const imagenesAdicionales = req.files?.imagenesAdicionales?.map(f => f.path) || null;
+    const video = req.files?.video?.[0]?.path || null;
 
     const nuevoProducto = await Catalogo.create({
       id_producto,
@@ -21,9 +23,9 @@ exports.crearProductoCatalogo = async (req, res) => {
       precio,
       categoria,
       subcategoria,
-      imagen_principal_url,
-      imagenes_adicionales_url,
-      video_url,
+      imagen_principal_url: imagenPrincipal,
+      imagenes_adicionales_url: imagenesAdicionales,
+      video_url: video
     });
 
     res.status(201).json(nuevoProducto);
