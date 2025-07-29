@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { crearCatalogo, obtenerCatalogos } = require('../controllers/catalogoController');
+const { crearProductoCatalogo, obtenerCatalogo } = require('../controllers/catalogoController');
 
-router.post('/', crearCatalogo);
-router.get('/', obtenerCatalogos);
+router.post('/', crearProductoCatalogo);
+router.get('/', obtenerCatalogo);
 
 module.exports = router;
