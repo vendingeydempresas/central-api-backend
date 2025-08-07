@@ -1,6 +1,8 @@
 const { createTransaction, commitTransaction } = require('../services/transbankService');
 const { Notificacion } = require('../models');
 const mqtt = require('mqtt');
+const sequelize = require('../config/database');
+
 
 const MQTT_BROKER = 'mqtt://test.mosquitto.org';
 const client = mqtt.connect(MQTT_BROKER);
@@ -99,15 +101,31 @@ exports.retornoPago = async (req, res) => {
       console.log('💾 Notificación de Transbank guardada en la base de datos');
 
       // 📡 Enviar MQTT si corresponde
-      if (result.status === 'AUTHORIZED' && partesId) {
-        const MQTT_TOPIC = `esp32/control_${partesId.despuesDeE}`;
-        client.publish(MQTT_TOPIC, JSON.stringify({
-          action: 'open',
-          Iddeproducto: referencia,
-          pin: partesId.despuesDeM
-        }));
-        console.log(`📡 Mensaje MQTT enviado a ${MQTT_TOPIC}`);
-      }
+if (result.status === 'AUTHORIZED' && partesId) {
+  const MQTT_TOPIC = `esp32/control_${partesId.despuesDeE}`;
+  const payload = {
+    action: 'open',
+    Iddeproducto: referencia,
+    pin: partesId.despuesDeM
+  };
+
+  client.publish(MQTT_TOPIC, JSON.stringify(payload));
+
+  console.log(`📡 Mensaje MQTT enviado a ${MQTT_TOPIC}`);
+
+  // ✅ Agregar este bloque justo aquí
+  await sequelize.query(`
+    INSERT INTO mqtt_logs (referencia, topic, payload)
+    VALUES (:referencia, :topic, :payload)
+  `, {
+    replacements: {
+      referencia,
+      topic: MQTT_TOPIC,
+      payload: JSON.stringify(payload)
+    }
+  });
+}
+
 
       res.send(`
         <html>
