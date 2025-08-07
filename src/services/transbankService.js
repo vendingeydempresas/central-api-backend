@@ -3,7 +3,7 @@ const { WebpayPlus, Options, Environment } = require('transbank-sdk');
 const options = new Options(
   process.env.TBK_COMMERCE_CODE,
   process.env.TBK_API_KEY,
-  Environment.Integration
+  Environment.Production
 );
 
 exports.createTransaction = async ({ buyOrder, sessionId, amount, returnUrl }) => {
