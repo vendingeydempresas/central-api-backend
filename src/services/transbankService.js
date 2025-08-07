@@ -1,8 +1,8 @@
 const { WebpayPlus, Options, Environment } = require('transbank-sdk');
 
 const options = new Options(
-  '597055555532',
-  '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',
+  process.env.TBK_COMMERCE_CODE,
+  process.env.TBK_API_KEY,
   Environment.Integration
 );
 
