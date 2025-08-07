@@ -1,6 +1,25 @@
 const { createTransaction, commitTransaction } = require('../services/transbankService');
+const { Notificacion } = require('../models');
+const mqtt = require('mqtt');
 
-const BASE_URL = "https://central-api-backend.onrender.com/transbank"; // Cambia si tienes otro dominio
+const MQTT_BROKER = 'mqtt://test.mosquitto.org';
+const client = mqtt.connect(MQTT_BROKER);
+client.on('connect', () => console.log('✅ MQTT conectado (Transbank)'));
+
+function extraerPartesId(id) {
+  const regex = /P(\d+).*M(\d+).*E(\d+)/;
+  const resultado = id?.match(regex);
+  if (resultado) {
+    return {
+      despuesDeP: resultado[1],
+      despuesDeM: resultado[2],
+      despuesDeE: resultado[3],
+    };
+  }
+  return null;
+}
+
+const BASE_URL = "https://central-api-backend.onrender.com/transbank";
 
 exports.iniciarPago = async (req, res) => {
   const data = req.query.data;
@@ -13,7 +32,7 @@ exports.iniciarPago = async (req, res) => {
     return res.status(400).send('Error al procesar los datos del pago');
   }
 
-  const { title, price } = producto;
+  const { title, price, external_reference } = producto;
   const buyOrder = `order_${Date.now()}`;
   const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
   const amount = price;
@@ -21,6 +40,8 @@ exports.iniciarPago = async (req, res) => {
 
   try {
     const { url, token } = await createTransaction({ buyOrder, sessionId, amount, returnUrl });
+
+    // Guardamos solo en memoria si es necesario, pero no obligatorio
     res.send(`
       <html>
         <body onload="document.forms[0].submit()">
@@ -45,6 +66,49 @@ exports.retornoPago = async (req, res) => {
   if (token_ws) {
     try {
       const result = await commitTransaction(token_ws);
+      const referencia = result.buy_order; // usamos buyOrder como ID y referencia base
+      const partesId = extraerPartesId(referencia);
+
+      // 🔒 Guardar en tabla Notificacion como con MercadoPago
+      await Notificacion.create({
+        payment_id: result.buy_order,
+        status: result.status,
+        monto: result.amount,
+        referencia: referencia,
+        payment_method: 'transbank',
+        currency: 'CLP',
+        payer_id: 'no_aplica',
+        payer_email: 'no_aplica',
+        description: 'Pago con Transbank',
+        status_detail: 'no_aplica',
+        transaction_amount: result.amount,
+        installments: 0,
+        payment_type: 'webpay',
+        order_id: result.buy_order,
+        order_type: 'no_aplica',
+        platform_id: 'no_aplica',
+        payment_method_id: 'webpay_plus',
+        payer_first_name: 'no_aplica',
+        payer_last_name: 'no_aplica',
+        payer_phone: 'no_aplica',
+        payer_identification_number: 'no_aplica',
+        transaction_details_total_paid: result.amount,
+        transaction_details_net_received: result.amount,
+        shipping_amount: 0
+      });
+      console.log('💾 Notificación de Transbank guardada en la base de datos');
+
+      // 📡 Enviar MQTT si corresponde
+      if (result.status === 'AUTHORIZED' && partesId) {
+        const MQTT_TOPIC = `esp32/control_${partesId.despuesDeE}`;
+        client.publish(MQTT_TOPIC, JSON.stringify({
+          action: 'open',
+          Iddeproducto: referencia,
+          pin: partesId.despuesDeM
+        }));
+        console.log(`📡 Mensaje MQTT enviado a ${MQTT_TOPIC}`);
+      }
+
       res.send(`
         <html>
           <body>
@@ -52,6 +116,7 @@ exports.retornoPago = async (req, res) => {
             <p>Orden: ${result.buy_order}</p>
             <p>Monto: ${result.amount}</p>
             <p>Estado: ${result.status}</p>
+            <p>Referencia: ${referencia}</p>
             <p>Token: ${token_ws}</p>
           </body>
         </html>

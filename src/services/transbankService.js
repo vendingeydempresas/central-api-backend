@@ -11,7 +11,10 @@ exports.createTransaction = async ({ buyOrder, sessionId, amount, returnUrl }) =
   const response = await transaction.create(buyOrder, sessionId, amount, returnUrl);
   return {
     url: response.url,
-    token: response.token
+    token: response.token,
+    buyOrder,
+    sessionId,
+    amount
   };
 };
 
