@@ -48,7 +48,7 @@ exports.iniciarPago = async (req, res) => {
     return res.status(400).send('Faltan campos: external_reference o price');
   }
 
-  // Mantén BUY ORDER corto y único para Transbank (no contiene P...M...E...)
+  // Mantén BUY ORDER corto y único (para Transbank)
   const buyOrder = `order_${Date.now().toString(36)}`; // <= 26 chars
   // Envía el external_reference por sessionId (hasta 61 chars)
   const sessionId = String(external_reference).slice(0, 61);
@@ -85,7 +85,7 @@ exports.retornoPago = async (req, res) => {
     try {
       const result = await commitTransaction(token_ws);
 
-      // Transbank devuelve buy_order y session_id (dependiendo del SDK puede venir sessionId)
+      // Transbank devuelve buy_order y session_id (según SDK puede venir sessionId)
       const referencia = result.session_id || result.sessionId || null; // aquí viene P...M...E...
       const partes = extraerPartesId(referencia);
 
@@ -127,14 +127,14 @@ exports.retornoPago = async (req, res) => {
 
         // Topic: esp32/control_<E>
         const topic = `esp32/control_${partes.servo}`;
-        // pin = M (número después de la M)
+        // ✅ Payload que tu ESP entiende:
+        // - action: "open"
+        // - Iddeproducto: referencia completa (P...M...E...)
+        // - pin: número después de la M
         const payloadObj = {
-          action: 'ABRIR_LOCKER',
-          referencia,                 // P...M...E...
-          pin: partes.maquina,        // <-- pin = M
-          servo: partes.servo,        // trazabilidad
-          id_producto: partes.id_producto,
-          ts: new Date().toISOString()
+          action: 'open',
+          Iddeproducto: referencia,
+          pin: partes.maquina
         };
         const payload = JSON.stringify(payloadObj);
 
