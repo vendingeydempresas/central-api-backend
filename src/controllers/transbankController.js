@@ -22,9 +22,10 @@ function getMqttClient() {
 }
 
 // ===================== HELPERS =====================
-/** Extrae { id_producto, maquina, servo } de P<id>M<maquina>E<servo> */
+/** Extrae { id_producto, maquina, servo } de P<id>M<maquina>E<servo>[T...] */
 function extraerPartesId(ref) {
-  const m = String(ref || '').match(/^P(\w+)M(\d+)E(\d+)$/);
+  // Acepta un sufijo T... opcional para unicidad del buyOrder
+  const m = String(ref || '').match(/^P(\w+)M(\d+)E(\d+)(?:T.*)?$/);
   return m ? { id_producto: m[1], maquina: Number(m[2]), servo: Number(m[3]) } : null;
 }
 
@@ -48,8 +49,8 @@ exports.iniciarPago = async (req, res) => {
     return res.status(400).send('Faltan campos: external_reference o price');
   }
 
-  // CLAVE: usar external_reference como buyOrder (P...M...E...)
-  const buyOrder = external_reference;
+  // ✅ buyOrder corto + único + parseable: P...M...E...T<timestamp_base36>
+  const buyOrder = `${external_reference}T${Date.now().toString(36)}`;
   const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
   const amount = price;
   const returnUrl = `${BASE_URL}/retorno`;
@@ -83,7 +84,7 @@ exports.retornoPago = async (req, res) => {
   if (token_ws) {
     try {
       const result = await commitTransaction(token_ws);
-      const referencia = result?.buy_order; // ahora es P...M...E...
+      const referencia = result?.buy_order; // ej: P...M...E...Tlqp5p1x
       const partes = extraerPartesId(referencia);
 
       // 1) Guardar notificación (ajusta campos si quieres)
@@ -127,7 +128,7 @@ exports.retornoPago = async (req, res) => {
         // pin = M (número después de la M)
         const payloadObj = {
           action: 'ABRIR_LOCKER',
-          referencia,                 // P...M...E...
+          referencia,                 // P...M...E...T...
           pin: partes.maquina,        // <-- pin = M
           servo: partes.servo,        // para trazabilidad
           id_producto: partes.id_producto,
