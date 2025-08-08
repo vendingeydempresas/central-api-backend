@@ -113,16 +113,17 @@ exports.retornoPago = async (req, res) => {
 
         // ✅ Guardar en tabla mqtt_logs
         try {
-          await sequelize.query(`
-            INSERT INTO mqtt_logs (referencia, topic, payload)
-            VALUES (:referencia, :topic, :payload)
-          `, {
-            replacements: {
-              referencia,
-              topic: MQTT_TOPIC,
-              payload: JSON.stringify(payload)
-            }
-          });
+await sequelize.query(`
+  INSERT INTO mqtt_logs (referencia, topic, payload)
+  VALUES (:referencia, :topic, :payload::jsonb)
+`, {
+  replacements: {
+    referencia,
+    topic: MQTT_TOPIC,
+    payload: JSON.stringify(payload)
+  }
+});
+
           console.log('📝 Log MQTT guardado en mqtt_logs');
         } catch (errorLog) {
           console.error('❌ Error al guardar mqtt_logs:', errorLog.message || errorLog);
