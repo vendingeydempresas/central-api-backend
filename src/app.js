@@ -12,7 +12,7 @@ const pagosRoutes = require('./routes/pagos').default;
 const detallecompraRoutes = require('./routes/detallecompra'); // Nueva ruta para detallecompra
 const transbankRoutes = require('./routes/transbank');  // Nueva ruta para transacciones
 const catalogoRoutes = require('./routes/catalogo');
-const verificacionRoutes = require('./routes/verificaciones');
+const verificacionRoutes = require('./routes/verificacion');
 
 // Log de comprobación
 console.log('productoRoutes:', typeof productoRoutes);
