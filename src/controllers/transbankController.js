@@ -22,10 +22,9 @@ function getMqttClient() {
 }
 
 // ===================== HELPERS =====================
-/** Extrae { id_producto, maquina, servo } de P<id>M<maquina>E<servo>[T...] */
+/** Extrae { id_producto, maquina, servo } de P<id>M<maquina>E<servo> */
 function extraerPartesId(ref) {
-  // Acepta un sufijo T... opcional para unicidad del buyOrder
-  const m = String(ref || '').match(/^P(\w+)M(\d+)E(\d+)(?:T.*)?$/);
+  const m = String(ref || '').match(/^P(\w+)M(\d+)E(\d+)$/);
   return m ? { id_producto: m[1], maquina: Number(m[2]), servo: Number(m[3]) } : null;
 }
 
@@ -49,9 +48,10 @@ exports.iniciarPago = async (req, res) => {
     return res.status(400).send('Faltan campos: external_reference o price');
   }
 
-  // ✅ buyOrder corto + único + parseable: P...M...E...T<timestamp_base36>
-  const buyOrder = `${external_reference}T${Date.now().toString(36)}`;
-  const sessionId = `session_${Math.floor(Math.random() * 100000)}`;
+  // Mantén BUY ORDER corto y único para Transbank (no contiene P...M...E...)
+  const buyOrder = `order_${Date.now().toString(36)}`; // <= 26 chars
+  // Envía el external_reference por sessionId (hasta 61 chars)
+  const sessionId = String(external_reference).slice(0, 61);
   const amount = price;
   const returnUrl = `${BASE_URL}/retorno`;
 
@@ -84,22 +84,24 @@ exports.retornoPago = async (req, res) => {
   if (token_ws) {
     try {
       const result = await commitTransaction(token_ws);
-      const referencia = result?.buy_order; // ej: P...M...E...Tlqp5p1x
+
+      // Transbank devuelve buy_order y session_id (dependiendo del SDK puede venir sessionId)
+      const referencia = result.session_id || result.sessionId || null; // aquí viene P...M...E...
       const partes = extraerPartesId(referencia);
 
-      // 1) Guardar notificación (ajusta campos si quieres)
+      // 1) Guardar notificación (se mantiene tu lógica de persistencia)
       try {
         await Notificacion.create({
           payment_id: result.buy_order,
           status: result.status,
           monto: result.amount,
-          referencia,
+          referencia: referencia || result.buy_order, // guardamos algo legible
           payment_method: 'transbank',
           currency: 'CLP',
           payer_id: 'no_aplica',
           payer_email: 'no_aplica',
           description: 'Pago con Transbank',
-          status_detail: 'AUTHORIZED',
+          status_detail: String(result.status || '').toUpperCase(),
           transaction_amount: result.amount,
           installments: 0,
           order_id: result.buy_order,
@@ -119,7 +121,7 @@ exports.retornoPago = async (req, res) => {
         console.error('❌ Error guardando Notificacion:', e.message || e);
       }
 
-      // 2) Enviar MQTT si está autorizado y referencia válida
+      // 2) Enviar MQTT si está autorizado y la referencia es parseable
       if (String(result.status).toUpperCase() === 'AUTHORIZED' && partes) {
         const client = getMqttClient();
 
@@ -128,9 +130,9 @@ exports.retornoPago = async (req, res) => {
         // pin = M (número después de la M)
         const payloadObj = {
           action: 'ABRIR_LOCKER',
-          referencia,                 // P...M...E...T...
+          referencia,                 // P...M...E...
           pin: partes.maquina,        // <-- pin = M
-          servo: partes.servo,        // para trazabilidad
+          servo: partes.servo,        // trazabilidad
           id_producto: partes.id_producto,
           ts: new Date().toISOString()
         };
@@ -162,7 +164,7 @@ exports.retornoPago = async (req, res) => {
           console.log('📝 Log MQTT guardado (texto)');
         }
       } else {
-        console.warn('⚠️ No se envía MQTT. Status:', result?.status, 'Partes:', partes);
+        console.warn('⚠️ No se envía MQTT. Status:', result?.status, 'Ref:', referencia, 'Partes:', partes);
       }
 
       // 4) Respuesta al usuario
@@ -171,9 +173,9 @@ exports.retornoPago = async (req, res) => {
           <body>
             <h1>✅ Transacción procesada</h1>
             <p>Orden: ${result.buy_order}</p>
+            <p>Sesión: ${result.session_id || result.sessionId || '—'}</p>
             <p>Monto: ${result.amount}</p>
             <p>Estado: ${result.status}</p>
-            <p>Referencia: ${referencia || '—'}</p>
             <p>Token: ${token_ws}</p>
           </body>
         </html>
