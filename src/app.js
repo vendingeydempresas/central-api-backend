@@ -13,6 +13,7 @@ const detallecompraRoutes = require('./routes/detallecompra'); // Nueva ruta par
 const transbankRoutes = require('./routes/transbank');  // Nueva ruta para transacciones
 const catalogoRoutes = require('./routes/catalogo');
 const verificacionRoutes = require('./routes/verificacion');
+const authRoutes = require('./routes/auth');
 
 // Log de comprobación
 console.log('productoRoutes:', typeof productoRoutes);
@@ -31,6 +32,7 @@ app.use('/api/detallecompra', detallecompraRoutes); // Ruta para manejar detalle
 app.use('/transbank', transbankRoutes);
 app.use('/api/catalogo', catalogoRoutes);
 app.use('/api', verificacionRoutes);
+app.use('/api', authRoutes);
 
 // Sincronizar la base de datos
 sequelize.sync({ alter: true }).then(() => console.log('DB sincronizada'));
