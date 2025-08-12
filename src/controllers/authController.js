@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { Usuario } = require('../models');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cambia_esto';
-const JWT_EXPIRES_IN = '7d';
+const JWT_EXPIRES_IN = '10s';
 
 const sanitize = (u) => ({
   id: u.id,
